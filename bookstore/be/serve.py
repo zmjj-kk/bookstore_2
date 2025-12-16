@@ -7,6 +7,9 @@ from be.model.store import init_database, db, init_completed_event  # 显式导�
 import sys
 from pathlib import Path
 
+os.environ['FLASK_SKIP_DOTENV'] = '1'  # 跳过.env加载
+os.environ['FLASK_RUN_HOST'] = '0.0.0.0'  # 允许外部访问
+
 # 将项目根目录添加到PYTHONPATH
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
