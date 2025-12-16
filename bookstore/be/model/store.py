@@ -56,10 +56,23 @@ database_instance: Store = None
 init_completed_event = threading.Event()
 
 
-def init_database(db_path):
-    global database_instance
-    database_instance = Store(db_path)
 
+def init_database(app):
+    # 使用应用配置创建连接池
+    db_config = {
+        "host": app.config["MYSQL_HOST"],
+        "user": app.config["MYSQL_USER"],
+        "password": app.config["MYSQL_PASSWORD"],
+        "database": app.config["MYSQL_DB"],
+        "port": app.config.get("MYSQL_PORT", 3306)
+    }
+
+ # 示例：创建数据库引擎（根据实际ORM调整）
+    engine = create_engine(f"mysql+pymysql://{db_config['user']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['database']}")
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # 将连接池注入应用上下文
+    app.extensions["db"] = SessionLocal
 
 def get_db_conn():
     global database_instance
