@@ -25,16 +25,16 @@ for rule in app.url_map.iter_rules():
 return jsonify(routes), 200
 # 健康检查路由
 @app.route('/db-health')
-def db_health():    
-try:        
-from be.model.store import db        
-with db.session.begin():
+def db_health():
+    try:
+        from be.model.store import db
+        with db.session.begin():
             result = db.session.execute(text("SELECT 1"))
-            logging.info(f"DB health check: {result.scalar()}")        
-return jsonify({"status": "healthy"}), 200    
-except Exception as e:
-        logging.error(f"DB health check failed: {str(e)}")        
-return jsonify({"error": str(e)}), 500
+            logging.info(f"DB health check: {result.scalar()}")
+            return jsonify({"status": "healthy"}), 200
+    except Exception as e:
+        logging.error(f"DB health check failed: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 # 将项目根目录添加到PYTHONPATH
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -56,11 +56,10 @@ def be_shutdown():
 
 
 def be_run():
-    # 初始化配置
     app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:021201hyj@localhost:3306/bookstore"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     
-    # 初始化数据库
+ # 初始化数据库
     init_database(app)
     
     # 注册蓝图
@@ -85,15 +84,15 @@ def be_run():
         ))
     logging.getLogger().addHandler(handler)
 
-    # 临时路由验证（测试后移除）
-    @app.route("/test-route")
-    def test_route():
-        return "This is a test route", 200
+# 临时路由验证（测试后移除）
+@app.route("/test-route")
+def test_route():
+    return "This is a test route", 200
 
 # 启动应用时打印所有路由
 if __name__ == '__main__':        
     print("Registered routes before run:")        
-for rule in app.url_map.iter_rules():            
-    print(f"Endpoint: {rule.endpoint}, URL: {rule}")        
-# 启动应用
-app.run(host="0.0.0.0", port=5000)
+    for rule in app.url_map.iter_rules():
+        print(f"Endpoint: {rule.endpoint}, URL: {rule}")        
+    # 启动应用
+    app.run(host="0.0.0.0", port=5000)
