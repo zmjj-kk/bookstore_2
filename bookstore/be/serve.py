@@ -57,6 +57,15 @@ def be_run():
     app.register_blueprint(bp_shutdown)
     app.register_blueprint(auth.bp_auth)
     app.register_blueprint(seller.bp_seller)
+@app.route("/db-health")
+def db_health():
+    try:
+        # 实际项目中替换为真实查询
+        session = app.extensions["db"]()
+        session.execute(text("SELECT 1"))
+        return "MySQL connected successfully", 200
+    except Exception as e:
+        return f"DB error: {str(e)}", 500
     app.register_blueprint(buyer.bp_buyer)
     init_completed_event.set()
     app.run()
