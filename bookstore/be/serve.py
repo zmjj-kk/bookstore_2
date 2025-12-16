@@ -65,5 +65,15 @@ def be_run():
         ))
     logging.getLogger().addHandler(handler)
 
-    # 启动应用
-    app.run(host="0.0.0.0", port=5000)
+    # 临时路由验证（测试后移除）
+    @app.route("/test-route")
+    def test_route():
+        return "This is a test route", 200
+
+# 启动应用时打印所有路由
+if __name__ == '__main__':        
+    print("Registered routes before run:")        
+for rule in app.url_map.iter_rules():            
+    print(f"Endpoint: {rule.endpoint}, URL: {rule}")        
+# 启动应用
+app.run(host="0.0.0.0", port=5000)
