@@ -25,10 +25,25 @@ def be_shutdown():
 
 
 def be_run():
+    # 添加MySQL配置（替换为实际值）
+    app.config["MYSQL_HOST"] = "localhost"
+    app.config["MYSQL_USER"] = "root@localhost"
+    app.config["MYSQL_PASSWORD"] = "021201hyj"
+    app.config["MYSQL_DB"] = "bookstore"
+    app.config["MYSQL_PORT"] = 3306  # 默认端口
+
+    # 初始化数据库连接（在init_database中注入配置）
+    init_database(app)  # 修改init_database函数接收app参数
+    
+    # 原有代码保持
     this_path = os.path.dirname(__file__)
     parent_path = os.path.dirname(this_path)
     log_file = os.path.join(parent_path, "app.log")
-    init_database(parent_path)
+    
+    # 注册蓝图和启动
+    app.register_blueprint(bp_shutdown)
+    # ...其他蓝图注册...
+    app.run(port=5000)  # 显式指定端口
 
     logging.basicConfig(filename=log_file, level=logging.ERROR)
     handler = logging.StreamHandler()
