@@ -2,6 +2,7 @@ import logging
 import os
 from flask import Flask
 from flask import Blueprint
+from flask import jsonify
 from be.view import auth, seller, buyer
 from be.model.store import init_database, db, init_completed_event  # 显式导入db
 import sys
@@ -9,6 +10,31 @@ from pathlib import Path
 
 os.environ['FLASK_SKIP_DOTENV'] = '1'  # 跳过.env加载
 os.environ['FLASK_RUN_HOST'] = '0.0.0.0'  # 允许外部访问
+os.environ['PYTHONSAFE3'] = '0'  # 关闭安全限制
+
+# 双重路由验证
+@app.route('/routes', methods=['GET'])
+def list_routes():
+    routes = []    
+for rule in app.url_map.iter_rules():
+        routes.append({            
+"url": str(rule),            
+"endpoint": rule.endpoint,            
+"methods": list(rule.methods)        
+})    
+return jsonify(routes), 200
+# 健康检查路由
+@app.route('/db-health')
+def db_health():    
+try:        
+from be.model.store import db        
+with db.session.begin():
+            result = db.session.execute(text("SELECT 1"))
+            logging.info(f"DB health check: {result.scalar()}")        
+return jsonify({"status": "healthy"}), 200    
+except Exception as e:
+        logging.error(f"DB health check failed: {str(e)}")        
+return jsonify({"error": str(e)}), 500
 
 # 将项目根目录添加到PYTHONPATH
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -28,15 +54,6 @@ def be_shutdown():
     func()
     return "Server shutting down..."
 
-# 健康检查路由（全局注册）
-@app.route("/db-health")
-def db_health():
-    try:
-        session = db.session
-        session.execute(text("SELECT 1"))
-        return "MySQL connected successfully", 200
-    except Exception as e:
-        return f"DB error: {str(e)}", 500
 
 def be_run():
     # 初始化配置
