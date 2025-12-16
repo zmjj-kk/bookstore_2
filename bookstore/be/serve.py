@@ -4,6 +4,12 @@ from flask import Flask
 from flask import Blueprint
 from be.view import auth, seller, buyer
 from be.model.store import init_database, db, init_completed_event  # 显式导入db
+import sys
+from pathlib import Path
+
+# 将项目根目录添加到PYTHONPATH
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 
 # 全局定义应用实例
 app = Flask(__name__)
