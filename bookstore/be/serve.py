@@ -7,6 +7,7 @@ from be.view import auth
 from be.view import seller
 from be.view import buyer
 from be.model.store import init_database, init_completed_event
+from sqlalchemy import text
 
 bp_shutdown = Blueprint("shutdown", __name__)
 
@@ -25,15 +26,17 @@ def be_shutdown():
 
 
 def be_run():
-    # 添加MySQL配置（替换为实际值）
-    app.config["MYSQL_HOST"] = "localhost"
-    app.config["MYSQL_USER"] = "root@localhost"
-    app.config["MYSQL_PASSWORD"] = "021201hyj"
-    app.config["MYSQL_DB"] = "bookstore"
-    app.config["MYSQL_PORT"] = 3306  # 默认端口
-
-    # 初始化数据库连接（在init_database中注入配置）
-    init_database(app)  # 修改init_database函数接收app参数
+    app = Flask(__name__)
+    app.register_blueprint(bp_shutdown)
+    app.register_blueprint(auth.bp_auth)
+    app.register_blueprint(seller.bp_seller) # 先创建应用实例
+    
+    # 修正后的配置
+    app.config["SQLALCHEHEMY_DATABASE_URI"] = "mysql://root:021201hyj@localhost:3306/bookstore"
+    app.config["SQLALCHEHEMY_TRACK_MODIFICATIONS"] = False
+    
+    # 初始化数据库
+    init_database(app)
     
     # 原有代码保持
     this_path = os.path.dirname(__file__)
@@ -53,19 +56,18 @@ def be_run():
     handler.setFormatter(formatter)
     logging.getLogger().addHandler(handler)
 
-    app = Flask(__name__)
-    app.register_blueprint(bp_shutdown)
-    app.register_blueprint(auth.bp_auth)
-    app.register_blueprint(seller.bp_seller)
+
+
 @app.route("/db-health")
 def db_health():
     try:
         # 实际项目中替换为真实查询
-        session = app.extensions["db"]()
+        session = db.session 
         session.execute(text("SELECT 1"))
         return "MySQL connected successfully", 200
     except Exception as e:
         return f"DB error: {str(e)}", 500
-    app.register_blueprint(buyer.bp_buyer)
-    init_completed_event.set()
-    app.run()
+    
+app.register_blueprint(buyer.bp_buyer)
+init_completed_event.set()
+app.run()
