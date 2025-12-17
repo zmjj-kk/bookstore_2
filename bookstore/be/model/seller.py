@@ -1,6 +1,6 @@
 import sqlite3 as sqlite
-from be.model import error
-from be.model import db_conn
+from bookstore.be.model import error
+from bookstore.be.model import db_conn
 
 
 class Seller(db_conn.DBConn):

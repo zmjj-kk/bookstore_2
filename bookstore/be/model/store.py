@@ -4,6 +4,11 @@ import sqlite3 as sqlite
 import threading
 
 
+
+
+    
+
+
 class Store:
     database: str
 
@@ -55,25 +60,44 @@ database_instance: Store = None
 # global variable for database sync
 init_completed_event = threading.Event()
 
+import pymysql
+from pymysql.cursors import DictCursor
 
+# 定义数据库配置（从mysql_config提取）
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '021201hyj',
+    'database': 'bookstore',
+    'cursorclass': DictCursor  # 返回字典格式结果
+}
+
+def get_connection():
+    """获取数据库连接"""
+    try:
+        conn = pymysql.connect(**db_config)
+        print("成功连接到MySQL数据库")
+        return conn
+    except pymysql.Error as e:
+        print(f"数据库连接失败: {e}")
+        raise
+
+# 创建全局连接对象（实际使用时建议在函数内创建）
+db = get_connection()
 
 def init_database(app):
-    # 使用应用配置创建连接池
-    db_config = {
-        "host": app.config["MYSQL_HOST"],
-        "user": app.config["MYSQL_USER"],
-        "password": app.config["MYSQL_PASSWORD"],
-        "database": app.config["MYSQL_DB"],
-        "port": app.config.get("MYSQL_PORT", 3306)
-    }
-
- # 示例：创建数据库引擎（根据实际ORM调整）
-    engine = create_engine(f"mysql+pymysql://{db_config['user']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['database']}")
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    # 延迟获取配置（确保app.config已设置）
+    config = app.config
     
-    # 将连接池注入应用上下文
-    app.extensions["db"] = SessionLocal
+    # 使用get()避免KeyError
+    host = config.get('MYSQL_HOST', 'localhost')
+    user = config.get('MYSQL_USER', 'root')
+    password = config.get('MYSQL_PASSWORD', '')
+    database = config.get('MYSQL_DB', 'bookstore')
 
+
+    
+ 
 def get_db_conn():
     global database_instance
     return database_instance.get_db_conn()

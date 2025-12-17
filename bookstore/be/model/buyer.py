@@ -2,8 +2,8 @@ import sqlite3 as sqlite
 import uuid
 import json
 import logging
-from be.model import db_conn
-from be.model import error
+from bookstore.be.model import db_conn
+from bookstore.be.model import error
 
 
 class Buyer(db_conn.DBConn):

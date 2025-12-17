@@ -1,10 +1,19 @@
+import sys
+from pathlib import Path
+
+# 将项目根目录添加到sys.path（绝对路径更安全）
+project_root = Path(__file__).parent.parent.parent  # 适用于bookstore_2/bookstore/be/app.py结构
+sys.path.append(str(project_root))
+
+
+from bookstore.be.app import app
 import logging
 import os
 from flask import Flask
 from flask import Blueprint
 from flask import jsonify
-from be.view import auth, seller, buyer
-from be.model.store import init_database, db, init_completed_event  # 显式导入db
+from bookstore.be.view import auth, seller, buyer
+from bookstore.be.model.store import init_database, db, init_completed_event  # 显式导入db
 import sys
 from pathlib import Path
 
@@ -16,13 +25,13 @@ os.environ['PYTHONSAFE3'] = '0'  # 关闭安全限制
 @app.route('/routes', methods=['GET'])
 def list_routes():
     routes = []    
-for rule in app.url_map.iter_rules():
+    for rule in app.url_map.iter_rules():
         routes.append({            
 "url": str(rule),            
 "endpoint": rule.endpoint,            
 "methods": list(rule.methods)        
 })    
-return jsonify(routes), 200
+    return jsonify(routes), 200
 # 健康检查路由
 @app.route('/db-health')
 def db_health():

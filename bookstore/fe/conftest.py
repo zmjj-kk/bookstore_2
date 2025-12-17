@@ -1,8 +1,17 @@
+import sys
+from pathlib import Path
+
+# 将项目根目录添加到sys.path
+project_root = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+
+
 import requests
 import threading
 from urllib.parse import urljoin
-from be import serve
-from be.model.store import init_completed_event
+from bookstore.be import serve
+from bookstore.be.model.store import init_completed_event
 from fe import conf
 
 thread: threading.Thread = None
